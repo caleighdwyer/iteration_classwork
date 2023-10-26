@@ -191,3 +191,113 @@ sim_mean_sd(n_obs = 3000, mu = 50, sigma = 12.3)
 sim_mean_sd(12, 24, 4)
 ```
 
+
+
+first step is to check that your input argument output work:
+
+```{r}
+ fellowship_ring = readxl::read_excel("./data/LotR_Words.xlsx", range = "B3:D6") |>
+  mutate(movie = "fellowship_ring")
+
+##it does
+```
+
+
+write a function that at least has the cell range and movie title. will also put in path in case path gets renamed
+
+
+```{r}
+
+lotr_function = function(path = "data/LotR_Words.xlsx", cell_range, movie_name){
+  movie_df = 
+    readxl::read_excel(path, range = cell_range) |> 
+    mutate(movie = movie_name)
+  
+  movie_df
+
+}
+
+##not working because of "attempt to use zero length variable name"? Fixed -- accidentally broke the chunk
+
+lotr_function(cell_range = "B3:D6", movie_name = "fellowship_ring")
+lotr_function(cell_range = "F3:H6", movie_name = "two_towers")
+lotr_function(cell_range = "J3:L6", movie_name = "two_towers")
+```
+
+```{r}
+lotr_function = function(path = "data/LotR_Words.xlsx", cell_range, movie_name){
+  movie_df = 
+    readxl::read_excel(path, range = cell_range) |> 
+    janitor::clean_names() |> 
+    gather(key = sex, value = words, female:male) |> 
+             mutate(race = str_to_lower(race),
+                    movie = movie_name)
+  
+  df
+
+}
+
+##used "cell_range" to name argument in function to differentiate from the argument "range" that is specific to the read_excel command
+```
+
+
+```{r}
+
+you can write on multiple lines at once by using "shift + option" and drag to the number of rows you want to write on
+you can write on multiple lines at once by using "shift + option" and drag to the number of rows you want to write on
+you can write on multiple lines at once by using "shift + option" and drag to the number of rows you want to write on
+```
+
+
+
+```{r}
+nsduh_url = "http://samhda.s3-us-gov-west-1.amazonaws.com/s3fs-public/field-uploads/2k15StateFiles/NSDUHsaeShortTermCHG2015.htm"
+
+nsduh_html = read_html(nsduh_url)
+
+data_marj = 
+  nsduh_html |> 
+  html_table() |> 
+  nth(1) |>
+  slice(-1) |> 
+  select(-contains("P Value")) |>
+  pivot_longer(
+    -State,
+    names_to = "age_year", 
+    values_to = "percent") |>
+  separate(age_year, into = c("age", "year"), sep = "\\(") |>
+  mutate(
+    year = str_replace(year, "\\)", ""),
+    percent = str_replace(percent, "[a-c]$", ""),
+    percent = as.numeric(percent)) |>
+  filter(!(State %in% c("Total U.S.", "Northeast", "Midwest", "South", "West")))
+```
+
+let's do this as a function instead
+
+```{r}
+nsduh_import = function(html, table_number, outcome_name){
+  html |> 
+  html_table() |> 
+  nth(table_number) |>
+  slice(-1) |> 
+  select(-contains("P Value")) |>
+  pivot_longer(
+    -State,
+    names_to = "age_year", 
+    values_to = "percent") |>
+  separate(age_year, into = c("age", "year"), sep = "\\(") |>
+  mutate(
+    year = str_replace(year, "\\)", ""),
+    percent = str_replace(percent, "[a-c]$", ""),
+    percent = as.numeric(percent),
+    outcome = outcome_name) |>
+  filter(!(State %in% c("Total U.S.", "Northeast", "Midwest", "South", "West")))
+  
+}
+
+nsduh_import(html = nsduh_html, table_number = 1, outcome_name = "marj")
+nsduh_import(html = nsduh_html, table_number = 4, outcome_name = "cocaine")
+```
+
+
