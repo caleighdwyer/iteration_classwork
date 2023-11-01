@@ -148,3 +148,78 @@ for (i in 1:4){
 ##this has now computed the mean and sd for each element of the list and pasted it into the output!
 ```
 
+
+##let's try map
+
+```{r}
+output = map(list_norm, mean_and_sd)
+
+##map just did the same thing as the for loop! but kept the vector name for each vector
+```
+
+
+what if you want a different function?
+
+```{r}
+output = map(list_norm, median)
+
+output = map(list_norm, IQR)
+
+
+```
+
+
+```{r}
+output = map_dbl(list_norm, median)
+##the output is a little clearer here
+
+output = map_df(list_norm, mean_and_sd)
+
+output = map_df(list_norm, mean_and_sd, .id = "input")
+##this adds an ID column to the df
+
+```
+
+
+##List columns!
+
+```{r}
+listcol_df =
+  tibble(
+    name = c("a", "b", "c", "d"),
+    samp= list_norm
+  )
+```
+
+
+```{r}
+listcol_df %>% pull(name)
+listcol_df %>% pull(samp)
+
+listcol_df%>%
+  filter(name=="a")
+```
+
+
+```{r}
+listcol_df$samp[[1]]
+mean_and_sd(listcol_df$samp[[1]])
+
+```
+
+
+```{r}
+map(listcol_df$samp, mean_and_sd)
+
+##not really sure what's going on with the listcol here
+```
+
+so can i add a list column?
+
+```{r}
+listcol_df =
+listcol_df %>%
+  mutate(summary = map(samp, mean_and_sd),
+medians = map_dbl(samp, median))
+```
+
