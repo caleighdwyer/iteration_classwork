@@ -5,26 +5,146 @@ date: "2023-11-01"
 output: github_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+basic structure of a for loop:
+
+input = list (...)
+output = list(...)
+
+for (i in 1:n) {
+output [[i]] = f(input[[i]])
+}
+
+However, for loops can get tedious and a little opaque. Loop functions are more efficient. They don't use indices. we'll use purrr::map(). Don't use Base R for loop functions in homework
+
+basic structure of map:
+
+output = map(input, f)
+
+produces the same result as a for loop, and isn't any faster, but it is cleaner/clearer in your write up
+
+workflow:
+write a single example for fixed inputs, then embed example in a for loop, then abstract loop body to a function, then rewrite using a map statement
+
+lists: help to store things that don't fit in data rectangles (can keep track of different types of inputs or outputs)
+
+a dataframe is a special kind of list
+
+A list can even contain a list! If you have an input list and output list of the same length, you can store that in a dataframe. benefit of keeping it in a dataframe is that you can do as many tidyverse transformations as you want.
+
+you can even have a list storing your dataframes
+
+```{r}
+library(tidyverse)
+library(rvest)
+
+library(p8105.datasets)
+
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+	fig.width = 8, 
+  fig.height = 6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
 ```
 
-## R Markdown
+##Lists
+You can put anything in a list
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+l = list(
+vec_numeric = 5:8,
+vec_logical = c(TRUE, TRUE, FALSE, TRUE, FALSE, FALSE),
+mat = matrix(1:8, nrow = 2, ncol= 4),
+summary = summary(rnorm(100))
+)
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+```{r}
+l
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+l$vec_numeric
+
+l[[1]]
+
+l[["vec_numeric"]]
+
+##all of these call the same things
+
+mean(l[["vec_numeric"]])
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+##for loop
+
+create a new list
+
+```{r}
+list_norm = 
+  list(
+    a= rnorm(20, mean=3, sd =1),
+    b= rnorm(30, mean=0, sd =5),
+    c= rnorm(40, mean=10, sd =.2),
+    d= rnorm(20, mean=-3, sd =1)
+  )
+```
+
+
+```{r}
+list_norm
+```
+
+```{r}
+mean_and_sd = function(x){
+  
+  if(!is.numeric(x)){
+    stop("Input must be numeric")
+  } 
+  if (length(x)<3){
+    stop("Input must have at least 3 numbers")
+  }
+  mean_x = mean(x)
+  sd_x = sd(x)
+  
+  tibble(
+    mean= mean_x,
+    sd = sd_x
+  )
+  
+}
+```
+
+
+```{r}
+mean_and_sd(list_norm[[1]])
+mean_and_sd([[2]])
+mean_and_sd([[3]])
+mean_and_sd([[4]])
+
+##even thought you have a function, you have to keep applying it to each different input. you don't want to do that. so we're moving into for loop
+```
+
+let's use a for loop
+
+```{r}
+output = vector("list", length = 4)
+
+output[[1]] = mean_and_sd(list_norm[[1]]) ##but we don't want to have to keep copying and pasting this
+
+for (i in 1:4){
+  output[[i]] = mean_and_sd(list_norm[[i]])
+}
+
+##this has now computed the mean and sd for each element of the list and pasted it into the output!
+```
+
