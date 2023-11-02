@@ -103,3 +103,18 @@ sample_size = fct_inorder(sample_size))|>
 ##result shows that as sample size increases, variability decreases
 ```
 
+
+
+```{r}
+sim_mean_sd_2 = function(n_obs, true_p = .9){
+  x_vec = rbinom(n = n_obs, size =1, prob = true_p)
+  
+  tibble(
+    mean = mean(x_vec),
+    sd = sd(x_vec)
+  )
+}
+
+## you could replace this with the sim_mean_sd chunk above and it would run all the same code for a binomial distribution (which shows probability from 0 to 1)
+```
+
