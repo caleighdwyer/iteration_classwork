@@ -197,3 +197,4 @@ sim_results_df |>
 ##regression coefficients are correlated with each other (demonstrated by graph above)
 ```
 
+try to always use tidyverse over base r, even in very similar functions (like read_csv vs. read.csv (base))
